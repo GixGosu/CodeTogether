@@ -2,6 +2,8 @@
 
 A Discord bot for orchestrating Claude Code instances, supporting both local execution and distributed cluster deployments.
 
+![CodeTogether Bot in Action](codetogether.png)
+
 ## Architecture Overview
 
 ```
