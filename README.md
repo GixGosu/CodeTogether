@@ -1,6 +1,25 @@
 # Claude Code Discord Bot
 
-A Discord bot for orchestrating Claude Code instances, supporting both local execution and distributed cluster deployments.
+CodeTogether is a Discord bot that brings AI-powered coding assistance directly into your server. It connects to Claude Code CLI, allowing team members to submit coding tasks and collaborate on projects—all through simple slash commands.
+
+How it works: Users type commands like /task prompt:"Fix the bug in auth.py" and the bot sends the request to Claude. With a registered project, Claude can read files, write code, edit existing files, run commands, search the web, and perform any action the Claude Code CLI supports—working directly in your codebase with full context.
+
+Key features:
+
+Slash commands for intuitive interaction (/task, /project, /status, /share)
+Project awareness – Claude works within registered project directories, reading and modifying files
+Full Claude capabilities – File editing, code execution, web search, and tool usage
+Multi-user collaboration – Share your wrapper with teammates using /share
+Session continuity – Continue previous conversations with session IDs
+Full output support – Long responses are automatically split across multiple messages
+
+Use cases:
+
+Development teams wanting AI assistance without leaving Discord
+Automated code reviews, refactoring, and bug fixes
+Personal coding projects with Discord as the interface
+Rapid prototyping and full-stack development
+The bot supports both local deployment (single user) and distributed setups where multiple team members can share access to each other's development environments. Built with security in mind, user identities are verified server-side through Discord's API.
 
 ![CodeTogether Bot in Action](codetogether.png)
 
