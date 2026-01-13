@@ -126,14 +126,17 @@ Understanding the connection flow helps with debugging and deployment decisions.
 - Python 3.11+
 - Rust 1.70+
 - Claude Code CLI (`npm install -g @anthropic-ai/claude-code`)
+  - **Windows users:** Requires WSL (Windows Subsystem for Linux)
 - Discord Bot Token ([Discord Developer Portal](https://discord.com/developers/applications))
 
 ### 1. Authenticate Claude Code CLI
 
 The wrapper uses your **local Claude Code CLI authentication** - no API key needed in the environment.
 
+> **Windows Users:** Claude Code CLI requires WSL. Run these commands in a WSL terminal (e.g., Ubuntu), not PowerShell.
+
 ```bash
-# Install Claude Code CLI
+# Install Claude Code CLI (in WSL on Windows)
 npm install -g @anthropic-ai/claude-code
 
 # Authenticate (one-time setup)
@@ -246,70 +249,96 @@ Follow these steps to test the complete system locally before deployment.
 ### Platform Support
 
 <details>
-<summary><strong>Windows (Native)</strong></summary>
+<summary><strong>Windows (Requires WSL)</strong></summary>
 
-The bot and wrapper both run natively on Windows:
+**Important:** Claude Code CLI requires WSL (Windows Subsystem for Linux). The bot runs on Windows, but the wrapper must run in WSL.
 
+**1. Install WSL (if not already installed):**
 ```powershell
-# Install Rust (if not already installed)
-winget install Rustlang.Rustup
+# In PowerShell as Administrator
+wsl --install
+# Restart your computer, then set up your Linux username/password
+```
+
+**2. Set up Claude CLI in WSL:**
+```bash
+# In WSL terminal (e.g., Ubuntu)
+# Install Node.js if needed
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
 # Install Claude Code CLI
 npm install -g @anthropic-ai/claude-code
 claude login
 
-# Bot (PowerShell)
-cd bot
-cargo run
-
-# Wrapper (PowerShell - separate terminal)
-cd wrapper
-pip install -e .
-claude-wrapper
-```
-
-**Note:** The wrapper uses Windows-compatible subprocess handling. No WSL required.
-
-</details>
-
-<details>
-<summary><strong>Windows with WSL</strong></summary>
-
-If you prefer running the wrapper in WSL (e.g., Claude CLI installed there):
-
-```powershell
-# Bot runs on Windows
-cd bot
-cargo run
-
-# Wrapper runs in WSL (from PowerShell)
-wsl -e bash -c "cd /mnt/c/path/to/wrapper && source .venv/bin/activate && claude-wrapper"
-```
-
-**Important:** Claude CLI permissions (`~/.claude/settings.json`) must be in the WSL home directory, not Windows.
-
-```bash
-# In WSL
+# Set up permissions
 mkdir -p ~/.claude
-cp .claude/settings.json ~/.claude/
+cat > ~/.claude/settings.json << 'EOF'
+{
+  "permissions": {
+    "allow": ["WebFetch", "WebSearch", "Read", "Write", "Edit", "Bash", "Computer"],
+    "deny": []
+  }
+}
+EOF
 ```
+
+**3. Set up the Wrapper in WSL:**
+```bash
+# In WSL terminal
+cd /mnt/c/path/to/CodeTogether/wrapper  # Adjust to your Windows path
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+**4. Run the services:**
+```powershell
+# Terminal 1 (PowerShell) - Bot runs on Windows
+cd bot
+cargo run
+
+# Terminal 2 (PowerShell) - Wrapper runs in WSL
+wsl -e bash -c "cd /mnt/c/path/to/CodeTogether/wrapper && source .venv/bin/activate && claude-wrapper"
+```
+
+**Tip:** Windows paths like `C:\Projects\CodeTogether` become `/mnt/c/Projects/CodeTogether` in WSL.
 
 </details>
 
 <details>
 <summary><strong>Linux / macOS</strong></summary>
 
+**1. Install Claude Code CLI:**
 ```bash
-# Bot
-cd bot
-cargo run
+# Install Node.js if needed (Ubuntu/Debian)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
-# Wrapper (separate terminal)
+# macOS with Homebrew
+brew install node
+
+# Install Claude CLI
+npm install -g @anthropic-ai/claude-code
+claude login
+
+# Set up permissions
+mkdir -p ~/.claude
+cp .claude/settings.json ~/.claude/
+```
+
+**2. Run the services:**
+```bash
+# Terminal 1 - Wrapper
 cd wrapper
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
 claude-wrapper
+
+# Terminal 2 - Bot
+cd bot
+cargo run
 ```
 
 </details>
@@ -347,8 +376,10 @@ WRAPPER_URL=http://localhost:8000
 
 ### Step 4: Authenticate Claude Code CLI
 
+> **Windows Users:** Run these commands in WSL, not PowerShell.
+
 ```bash
-# Install Claude Code CLI
+# Install Claude Code CLI (in WSL on Windows, or native terminal on Linux/macOS)
 npm install -g @anthropic-ai/claude-code
 
 # Login (opens browser for authentication)
