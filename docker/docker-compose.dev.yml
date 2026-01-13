@@ -1,0 +1,27 @@
+# Minimal development setup (Phase 1)
+# Usage: docker-compose -f docker-compose.dev.yml up -d
+
+services:
+  # Wrapper service only (no orchestration)
+  wrapper:
+    build:
+      context: ../wrapper
+      dockerfile: Dockerfile
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-debug}
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount source for hot reload during development
+      - ../wrapper/src:/app/src:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+# Note: Run the Rust bot locally with `cargo run` during development
+# for faster iteration. Use full docker-compose.yml for integration testing.

@@ -1,0 +1,39 @@
+[package]
+name = "discord-bot"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name"]
+description = "Discord bot for orchestrating Claude Code instances on Raspberry Pi cluster"
+
+[dependencies]
+# Discord
+serenity = { version = "0.12", default-features = false, features = ["client", "gateway", "rustls_backend", "model"] }
+
+# Async runtime
+tokio = { version = "1.35", features = ["macros", "rt-multi-thread", "signal"] }
+
+# HTTP client
+reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Configuration
+dotenvy = "0.15"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Utilities
+uuid = { version = "1.6", features = ["v4"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"

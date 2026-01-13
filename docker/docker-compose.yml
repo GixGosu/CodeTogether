@@ -1,0 +1,95 @@
+# Full local development stack
+# Usage: docker-compose up -d
+
+services:
+  # Discord bot
+  bot:
+    build:
+      context: ../bot
+      dockerfile: Dockerfile
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
+      - WRAPPER_URL=http://orchestrator:8000
+      - RUST_LOG=${RUST_LOG:-info}
+    depends_on:
+      orchestrator:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - claude-net
+
+  # Orchestrator (wrapper service in orchestrator mode)
+  orchestrator:
+    build:
+      context: ../wrapper
+      dockerfile: Dockerfile
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - NATS_URL=nats://nats:4222
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - nats
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - claude-net
+
+  # Worker nodes (Claude Code executors)
+  worker:
+    build:
+      context: ../wrapper
+      dockerfile: Dockerfile
+    command: ["python", "-m", "wrapper.worker"]
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - NATS_URL=nats://nats:4222
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    depends_on:
+      - nats
+      - redis
+    deploy:
+      replicas: 3
+    restart: unless-stopped
+    networks:
+      - claude-net
+
+  # Message broker
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"
+      - "8222:8222"  # HTTP monitoring
+    command: ["--jetstream", "--http_port", "8222"]
+    restart: unless-stopped
+    networks:
+      - claude-net
+
+  # State storage
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+    networks:
+      - claude-net
+
+volumes:
+  redis-data:
+
+networks:
+  claude-net:
+    driver: bridge
