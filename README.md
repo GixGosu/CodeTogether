@@ -1005,6 +1005,11 @@ cargo run
 - [x] Per-user project isolation
 - [x] Collaborative sharing
 - [x] Path security restrictions
+
+**Pending Features** *(awaiting Claude policy clarification)*
+
+The following features are designed but not yet implemented. Multi-tenant and containerized deployments may have implications under Anthropic's terms of service. We're monitoring policy updates before proceeding:
+
 - [ ] Phase 2: Docker Compose with NATS/Redis
 - [ ] Phase 3: Kubernetes deployment for Pi cluster
 - [ ] Worker auto-scaling
